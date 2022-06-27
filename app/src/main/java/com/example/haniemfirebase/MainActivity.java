@@ -1,8 +1,10 @@
 package com.example.haniemfirebase;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -48,6 +50,9 @@ public class MainActivity extends AppCompatActivity {
     TextView stt_text;
     final int PERMISSION = 1;
 
+    //결과
+    Button btn_res;
+
     // random script 설정
     String key = Integer.toString(new Random().nextInt(5) + 1);  // DB의 키 (1~5)
 
@@ -74,15 +79,17 @@ public class MainActivity extends AppCompatActivity {
         eng_text = findViewById(R.id.eng_text);
         kor_text = findViewById(R.id.kor_text);
 
-        myRef.addListenerForSingleValueEvent(new ValueEventListener(){
+        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 Script data = snapshot.getValue(Script.class);
                 eng_text.setText(data.getEnglish());
                 kor_text.setText(data.getKorean());
             }
+
             @Override
-            public void onCancelled(@NonNull DatabaseError error) { }
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
         });
 
         // tts
@@ -90,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
         tts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
-                if(status!=android.speech.tts.TextToSpeech.ERROR) {
+                if (status != android.speech.tts.TextToSpeech.ERROR) {
                     tts.setLanguage(Locale.ENGLISH); // English 로 음성변환 언어 지정
                 }
             }
@@ -108,42 +115,54 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        if ( Build.VERSION.SDK_INT >= 23 ){
+        //stt
+        if (Build.VERSION.SDK_INT >= 23) {
             // 퍼미션 체크
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.INTERNET,
-                    Manifest.permission.RECORD_AUDIO},PERMISSION);
+                    Manifest.permission.RECORD_AUDIO}, PERMISSION);
         }
-        stt_text = (TextView)findViewById(R.id.stt_text);
+        stt_text = (TextView) findViewById(R.id.stt_text);
         btn_stt = (Button) findViewById(R.id.btnSTT);
 
-        intent=new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE,getPackageName());
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE,"en-US");
+        intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getPackageName());
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-US");
 
-        btn_stt.setOnClickListener(v ->{
-            mRecognizer[0] =SpeechRecognizer.createSpeechRecognizer(this);
-            mRecognizer[0].setRecognitionListener(listener);
-            mRecognizer[0].startListening(intent);
+        btn_stt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mRecognizer[0] = SpeechRecognizer.createSpeechRecognizer(MainActivity.this);
+                mRecognizer[0].setRecognitionListener(listener);
+                mRecognizer[0].startListening(intent);
+            }
         });
     }
 
     private RecognitionListener listener = new RecognitionListener() {
         @Override
         public void onReadyForSpeech(Bundle params) {
-            Toast.makeText(getApplicationContext(),"음성인식을 시작합니다.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "음성인식을 시작합니다.", Toast.LENGTH_SHORT).show();
         }
 
         @Override
-        public void onBeginningOfSpeech() {}
+        public void onBeginningOfSpeech() {
+            // 말하기 시작했을 때 호출
+        }
 
         @Override
-        public void onRmsChanged(float rmsdB) {}
+        public void onRmsChanged(float rmsdB) {
+            // 입력받는 소리의 크기를 알려줌
+        }
 
         @Override
-        public void onBufferReceived(byte[] buffer) {}
+        public void onBufferReceived(byte[] buffer) {
+            // 말을 시작하고 인식이 된 단어를 buffer에 담음
+        }
 
         @Override
-        public void onEndOfSpeech() {}
+        public void onEndOfSpeech() {
+            //말하기 중지시 호출
+        }
 
         @Override
         public void onError(int error) {
@@ -181,8 +200,15 @@ public class MainActivity extends AppCompatActivity {
                     message = "알 수 없는 오류임";
                     break;
             }
+            Toast.makeText(getApplicationContext(), "에러가 발생하였습니다. : " + message, Toast.LENGTH_SHORT).show();
 
-            Toast.makeText(getApplicationContext(), "에러가 발생하였습니다. : " + message,Toast.LENGTH_SHORT).show();
+            btn_res = findViewById(R.id.result);
+            btn_res.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    btn_res.setText("오류");
+                }
+            });
         }
 
         @Override
@@ -191,15 +217,40 @@ public class MainActivity extends AppCompatActivity {
             ArrayList<String> matches =
                     results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
 
-            for(int i = 0; i < matches.size() ; i++){
+            String resultStr = "";
+
+            for (int i = 0; i < matches.size(); i++) {
                 stt_text.setText(matches.get(i));
+                resultStr += matches.get(i);
             }
+
+            moveActivity(resultStr);
         }
 
         @Override
-        public void onPartialResults(Bundle partialResults) {}
+        public void onPartialResults(Bundle partialResults) {
+        }
 
         @Override
-        public void onEvent(int eventType, Bundle params) {}
+        public void onEvent(int eventType, Bundle params) {
+        }
     };
+
+
+    public void moveActivity(String resultStr) {
+        btn_res.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(resultStr == eng_text.getText()) {
+                    Intent i = new Intent(getApplicationContext(), CorrectActivity.class);
+                    startActivity(i);
+                }
+                else {
+                    Intent i = new Intent(getApplicationContext(), SubActivity.class);
+                    startActivity(i);
+                }
+            }
+        });
+    }
 }
+

@@ -23,6 +23,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        //결과 페이지로 이동하는 액티비티
+        <activity android:name=".SubActivity"/>
+        <activity android:name=".CorrectActivity"/>
     </application>
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.INTERNET" />
