@@ -30,7 +30,6 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import java.util.ArrayList;
-import java.util.StringTokenizer;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -195,8 +194,6 @@ public class MainActivity extends AppCompatActivity {
             for(int i = 0; i < matches.size() ; i++){
                 stt_text.setText(matches.get(i));
             }
-
-            moveNext(); // 결과 화면 이동
         }
 
         @Override
@@ -204,24 +201,5 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onEvent(int eventType, Bundle params) {}
-
     };
-
-    public void moveNext() { // 사용자가 말한 문장 = 정답 문장 이면 결과 화면으로 이동하는 메소드
-        String userText = stt_text.getText().toString(); // 사용자가 말한 문장
-        String compText = eng_text.getText().toString(); // 비교할 정답 문장
-
-        StringTokenizer userSt = new StringTokenizer(userText, " "); // 단어가 순서대로 일치하는지 검사하기 위해 StringTokenizer 사용
-        StringTokenizer compSt = new StringTokenizer(compText, " .,!?");
-
-        while ((userSt.hasMoreTokens()) && (compSt.hasMoreTokens())) {
-            if (!(userSt.nextToken().equalsIgnoreCase(compSt.nextToken()))) {
-                return; // 일치하지 않을 시 메소드 종료
-            }
-        }
-
-        // while문을 수행했다면 사용자는 올바르게 스피킹한 것이므로 다음 화면으로 전환
-        Intent resultPage = new Intent(MainActivity.this, ResultActivity.class);
-        startActivity(resultPage);
-    }
 }
