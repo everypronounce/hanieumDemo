@@ -49,10 +49,10 @@ public class MainActivity extends AppCompatActivity {
     String eng_text; // tts 로 읽을 부분
     String kor_text;
 
-    TextView com_text;
-
+    TextView com_text; // 정확도 등 화면에 출력 위함
+    
     // random script 설정
-    String key = Integer.toString(new Random().nextInt(5) + 1);  // DB의 키 (1~5)
+    String key = Integer.toString(new Random().nextInt(11756) + 1);  // DB의 키 (1~11756) 문장 개수가 늘어나면 계속 수정해야 하는 번거로움
 
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference myRef = database.getReference(key); // key에 해당하는 DB의 참조 값
@@ -215,6 +215,34 @@ public class MainActivity extends AppCompatActivity {
         StringTokenizer user_st = new StringTokenizer(user_text, " "); // 단어가 순서대로 일치하는지 검사하기 위해 StringTokenizer 사용
         StringTokenizer eng_st = new StringTokenizer(eng_text, " .,!?");
 
+        int denominator = eng_st.countTokens(); // 정확도 분석에 필요
+        double numerator = 0.0; // 정확도 분석에 필요
+
+        while ((user_st.hasMoreTokens()) && (eng_st.hasMoreTokens())) {
+            if (user_st.nextToken().equalsIgnoreCase(eng_st.nextToken())) {
+                numerator++;
+            }
+        }
+        if (user_st.hasMoreTokens()) {
+            numerator -= (double)user_st.countTokens() / (denominator + user_st.countTokens());
+        }
+
+        if (numerator < 0) {
+            numerator = 0;
+        }
+
+        double percentage = numerator / denominator * 100;
+
+        com_text.setText("정확도: " + percentage + "%");
+
+        if (percentage > 80) {
+            Intent resultPageIntent = new Intent(MainActivity.this, ResultActivity.class);
+            resultPageIntent.putExtra("eng", eng_text);
+            resultPageIntent.putExtra("kor", kor_text);
+            startActivity(resultPageIntent);
+        }
+
+        /* 정확도 분석x, 100% 여야 통과
         while ((user_st.hasMoreTokens()) && (eng_st.hasMoreTokens())) {
             if (user_st.countTokens() != eng_st.countTokens()) {
                 com_text.setText("다시 말하세요.");
@@ -225,11 +253,11 @@ public class MainActivity extends AppCompatActivity {
                 return; // 단어 및 순서가 일치하지 않을 시 메소드 종료
             }
         }
-
         // while문을 수행했다면 사용자는 올바르게 스피킹한 것이므로 다음 화면으로 전환
         Intent resultPageIntent = new Intent(MainActivity.this, ResultActivity.class);
         resultPageIntent.putExtra("eng", eng_text);
         resultPageIntent.putExtra("kor", kor_text);
         startActivity(resultPageIntent);
+        */
     }
 }
