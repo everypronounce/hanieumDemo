@@ -15,7 +15,7 @@ import android.widget.Toast;
 
 import java.util.Calendar;
 
-public class MainActivity extends AppCompatActivity {
+public class AlarmSetActivity extends AppCompatActivity {
 
     private Button save;
     private TimePicker timePicker;
@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
             calendar.set(Calendar.MINUTE,minute);
             calendar.set(Calendar.SECOND, 0);
 
-           // 알람 시간이 현재시간보다 빠를 때 하루 뒤로 맞춤
+            // 알람 시간이 현재시간보다 빠를 때 하루 뒤로 맞춤
             if (calendar.before(Calendar.getInstance())) {
                 calendar.add(Calendar.DATE, 1);
             }
@@ -47,10 +47,10 @@ public class MainActivity extends AppCompatActivity {
             Intent alarmIntent = new Intent(getApplicationContext(), AlarmReceiver.class);
             AlarmManager alarmManager = (AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
             alarmIntent.setAction(AlarmReceiver.ACTION_RESTART_SERVICE);
-            PendingIntent alarmRingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent alarmRingIntent = PendingIntent.getBroadcast(AlarmSetActivity.this, 0, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), alarmRingIntent);
 
-            Toast.makeText(MainActivity.this,"알람이 저장되었습니다.",Toast.LENGTH_LONG).show();
+            Toast.makeText(AlarmSetActivity.this,"알람이 저장되었습니다.",Toast.LENGTH_LONG).show();
         });
     }
 }
