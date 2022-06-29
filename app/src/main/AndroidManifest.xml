@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <application
         android:allowBackup="true"
@@ -18,7 +19,7 @@
         android:theme="@style/Theme.HaniemFirebase"
         tools:targetApi="31" >
         <activity
-            android:name=".MainActivity"
+            android:name=".AlarmSetActivity"
             android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,6 +28,15 @@
             </intent-filter>
         </activity>
         <activity android:name=".ResultActivity"/>
+        <activity android:name=".MainActivity"/>
+        <activity android:name=".AlarmActivity"/>
+
+        <service
+            android:name=".AlarmService"
+            android:enabled="true"
+            android:exported="true"
+            tools:ignore="Instantiatable" />
+        <receiver android:name=".AlarmReceiver"></receiver>
     </application>
 
 </manifest>

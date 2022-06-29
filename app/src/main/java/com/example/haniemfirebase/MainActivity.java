@@ -235,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
 
         com_text.setText("정확도: " + percentage + "%");
 
-        if (percentage > 80) {
+        if (percentage > 80) { // 정확도 80% 넘어야 통과 (당연히 입맛따라 바꾸기 가능~)
             Intent resultPageIntent = new Intent(MainActivity.this, ResultActivity.class);
             resultPageIntent.putExtra("eng", eng_text);
             resultPageIntent.putExtra("kor", kor_text);
